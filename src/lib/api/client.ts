@@ -20,6 +20,35 @@ interface RequestOptions {
   body?: unknown;
 }
 
+/** Parsed JSON body plus the HTTP status it came with. Use this instead of
+ * apiRequest() when a caller needs to distinguish between two different
+ * "successful" (2xx) response shapes - e.g. GET /v1/sermons/{id} returns
+ * 200 with full analysis OR 202 while still processing, and the caller
+ * needs to know which one it got. */
+export interface ApiResult<TBody> {
+  status: number;
+  body: TBody;
+}
+
+async function sendRequest(
+  path: string,
+  options: RequestOptions,
+): Promise<Response> {
+  const response = await fetch(`${config.apiBaseUrl}${path}`, {
+    method: options.method ?? "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  if (!response.ok) {
+    const message = await extractErrorMessage(response);
+    throw new ApiError(response.status, message);
+  }
+
+  return response;
+}
+
 /**
  * Makes a request to the Logos backend and returns the parsed JSON body.
  *
@@ -39,17 +68,7 @@ export async function apiRequest<TResponse>(
   path: string,
   options: RequestOptions = {},
 ): Promise<TResponse> {
-  const response = await fetch(`${config.apiBaseUrl}${path}`, {
-    method: options.method ?? "GET",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-
-  if (!response.ok) {
-    const message = await extractErrorMessage(response);
-    throw new ApiError(response.status, message);
-  }
+  const response = await sendRequest(path, options);
 
   // 204 No Content has no body to parse.
   if (response.status === 204) {
@@ -57,6 +76,23 @@ export async function apiRequest<TResponse>(
   }
 
   return response.json() as Promise<TResponse>;
+}
+
+/**
+ * Like apiRequest, but returns the HTTP status alongside the body instead
+ * of assuming a single success shape. Use this when an endpoint documents
+ * more than one 2xx response (see GET /v1/sermons/{id} in design-doc.md).
+ */
+export async function apiRequestWithStatus<TBody>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ApiResult<TBody>> {
+  const response = await sendRequest(path, options);
+  const body =
+    response.status === 204
+      ? (undefined as TBody)
+      : ((await response.json()) as TBody);
+  return { status: response.status, body };
 }
 
 async function extractErrorMessage(response: Response): Promise<string> {
