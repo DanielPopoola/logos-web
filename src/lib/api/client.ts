@@ -18,6 +18,10 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
+  /** Extra headers to merge in on top of the defaults. Used by the
+   * server-side variant to forward the session cookie explicitly, since
+   * server-side fetch has no browser cookie jar to rely on. */
+  headers?: Record<string, string>;
 }
 
 /** Parsed JSON body plus the HTTP status it came with. Use this instead of
@@ -30,14 +34,17 @@ export interface ApiResult<TBody> {
   body: TBody;
 }
 
-async function sendRequest(
+export async function sendRequest(
   path: string,
   options: RequestOptions,
 ): Promise<Response> {
   const response = await fetch(`${config.apiBaseUrl}${path}`, {
     method: options.method ?? "GET",
+    // Only meaningful for browser-issued fetches - see server-client.ts
+    // for why server-side calls can't rely on this and forward the
+    // session cookie manually instead.
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...options.headers },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 

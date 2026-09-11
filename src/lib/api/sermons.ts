@@ -1,4 +1,6 @@
-import { ApiError, apiRequest, apiRequestWithStatus } from "@/lib/api/client";
+import "server-only";
+import { ApiError } from "@/lib/api/client";
+import { serverApiRequest, serverApiRequestWithStatus } from "@/lib/api/server-client";
 import type { ApiEnvelope, SermonDetail, SermonLibraryPage } from "@/lib/api/types";
 
 interface GetLibraryOptions {
@@ -19,7 +21,7 @@ export async function getLibrary(
   const query = params.toString();
   const path = query ? `/v1/sermons?${query}` : "/v1/sermons";
 
-  const response = await apiRequest<ApiEnvelope<SermonLibraryPage>>(path);
+  const response = await serverApiRequest<ApiEnvelope<SermonLibraryPage>>(path);
   return response.data;
 }
 
@@ -37,7 +39,7 @@ export async function getSermonDetail(
   sermonId: string,
 ): Promise<SermonDetailResult> {
   try {
-    const result = await apiRequestWithStatus<ApiEnvelope<SermonDetail>>(
+    const result = await serverApiRequestWithStatus<ApiEnvelope<SermonDetail>>(
       `/v1/sermons/${sermonId}`,
     );
 
