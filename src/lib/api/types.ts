@@ -71,12 +71,15 @@ export interface SermonNote {
  * contract (NoteCreateOut) that happens to match today. */
 export type CreatedNote = SermonNote;
 
+/** A sermon-level search result - no excerpt or timestamp, since search
+ * now returns which sermon discusses a topic rather than a specific
+ * chunk/moment (cheaper, and multiple matching chunks in the same sermon
+ * collapse to one result on the backend). Matches SearchResultOut. */
 export interface SearchResult {
   sermon_id: string;
   sermon_title: string | null;
   speaker: string | null;
-  matched_excerpt: string;
-  timestamp_seconds: number | null;
+  duration_seconds: number | null;
   relevance_score: number;
 }
 
@@ -89,14 +92,12 @@ export interface SearchResponse {
   message: string | null;
 }
 
-/** A source cited in an Ask (RAG) answer. Deliberately a narrower shape
- * than SearchResult (no speaker, no relevance_score) - matches SourceOut
- * on the backend exactly. */
+/** A source cited in an Ask (RAG) answer - sermon-level, same as
+ * SearchResult (no excerpt/timestamp). Matches SourceOut on the backend. */
 export interface AskSource {
   sermon_id: string;
   sermon_title: string | null;
-  matched_excerpt: string;
-  timestamp_seconds: number | null;
+  duration_seconds: number | null;
 }
 
 /** Response from POST /v1/ask. Note: unlike search, the empty-library
