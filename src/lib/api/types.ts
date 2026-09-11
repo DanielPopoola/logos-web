@@ -89,6 +89,26 @@ export interface SearchResponse {
   message: string | null;
 }
 
+/** A source cited in an Ask (RAG) answer. Deliberately a narrower shape
+ * than SearchResult (no speaker, no relevance_score) - matches SourceOut
+ * on the backend exactly. */
+export interface AskSource {
+  sermon_id: string;
+  sermon_title: string | null;
+  matched_excerpt: string;
+  timestamp_seconds: number | null;
+}
+
+/** Response from POST /v1/ask. Note: unlike search, the empty-library
+ * case is NOT a separate signal here - the backend just returns a normal
+ * 200 with a friendly `answer` and `sources: []` (see
+ * SearchService.EMPTY_LIBRARY_ANSWER), so the frontend doesn't need a
+ * special branch for it - just render whatever `answer` says. */
+export interface AskResponse {
+  answer: string;
+  sources: AskSource[];
+}
+
 /** Full sermon detail (GET /v1/sermons/{id}), returned only when status is completed. */
 export interface SermonDetail {
   id: string;
