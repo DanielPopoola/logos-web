@@ -25,7 +25,9 @@ export type SermonStatus = "pending" | "processing" | "completed" | "failed";
 /** One row in the library list (GET /v1/sermons). Intentionally lighter
  * than SermonDetail - the backend truncates summary_excerpt server-side
  * and omits full analysis to keep this endpoint fast (see design-doc.md's
- * <300ms library SLO). */
+ * <300ms library SLO). Confirmed against app/schemas/sermon.py's
+ * LibraryItemOut - notably, no failure_reason here (only on SermonDetail);
+ * a failed card shows a generic message rather than the real reason. */
 export interface SermonListItem {
   id: string;
   title: string | null;
@@ -35,7 +37,6 @@ export interface SermonListItem {
   summary_excerpt: string | null;
   themes: string[];
   saved_at: string;
-  failure_reason: string | null;
 }
 
 export interface SermonLibraryPage {
@@ -43,6 +44,13 @@ export interface SermonLibraryPage {
   page: number;
   page_size: number;
   total: number;
+}
+
+/** Response from POST /v1/sermons and POST /v1/sermons/{id}/retry. */
+export interface SermonSubmission {
+  id: string;
+  status: SermonStatus;
+  youtube_url: string;
 }
 
 export interface SermonAnalysis {
@@ -57,6 +65,11 @@ export interface SermonNote {
   content: string;
   created_at: string;
 }
+
+/** Response from POST /v1/sermons/{id}/notes - identical shape to
+ * SermonNote, kept as a separate alias since it's a distinct response
+ * contract (NoteCreateOut) that happens to match today. */
+export type CreatedNote = SermonNote;
 
 /** Full sermon detail (GET /v1/sermons/{id}), returned only when status is completed. */
 export interface SermonDetail {

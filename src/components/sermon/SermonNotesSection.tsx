@@ -1,6 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import type { SermonNote } from "@/lib/api/types";
 import { formatShortDate } from "@/lib/format";
 import { SermonSectionCard } from "@/components/sermon/SermonSectionCard";
+import { AddNoteForm } from "@/components/sermon/AddNoteForm";
+
+interface SermonNotesSectionProps {
+  sermonId: string;
+  initialNotes: SermonNote[];
+}
 
 /**
  * The user's own notes on this sermon - the only place notes live (there's
@@ -9,11 +18,17 @@ import { SermonSectionCard } from "@/components/sermon/SermonSectionCard";
  * indigo/tertiary + auto_awesome there, per the design system's signifier
  * convention.
  *
- * The add-note input is not yet wired to POST /v1/sermons/{id}/notes -
- * that requires client-side state and a server action, left as a
- * follow-up rather than guessing at the submit/error UX here.
+ * This is a Client Component (holds notes-list state so a newly-created
+ * note appears immediately without a full page refetch), seeded from the
+ * server-rendered initialNotes prop.
  */
-export function SermonNotesSection({ notes }: { notes: SermonNote[] }) {
+export function SermonNotesSection({ sermonId, initialNotes }: SermonNotesSectionProps) {
+  const [notes, setNotes] = useState(initialNotes);
+
+  function handleNoteCreated(note: SermonNote) {
+    setNotes((current) => [note, ...current]);
+  }
+
   return (
     <SermonSectionCard>
       <div className="flex items-center justify-between mb-4">
@@ -24,25 +39,23 @@ export function SermonNotesSection({ notes }: { notes: SermonNote[] }) {
         </span>
       </div>
 
-      <div className="flex flex-col gap-3 mb-4">
-        {notes.map((note) => (
-          <div
-            key={note.id}
-            className="bg-secondary-container/10 rounded-2xl px-4 py-3.5"
-          >
-            <p className="text-base italic">&quot;{note.content}&quot;</p>
-            <p className="text-xs text-on-surface-variant font-medium mt-2">
-              {formatShortDate(note.created_at)}
-            </p>
-          </div>
-        ))}
-      </div>
+      {notes.length > 0 && (
+        <div className="flex flex-col gap-3 mb-4">
+          {notes.map((note) => (
+            <div
+              key={note.id}
+              className="bg-secondary-container/10 rounded-2xl px-4 py-3.5"
+            >
+              <p className="text-base italic">&quot;{note.content}&quot;</p>
+              <p className="text-xs text-on-surface-variant font-medium mt-2">
+                {formatShortDate(note.created_at)}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <textarea
-        placeholder="Add a personal reflection..."
-        rows={3}
-        className="w-full bg-surface-container-low rounded-2xl px-4 py-3 text-base outline-none border-2 border-transparent focus:border-secondary-container resize-none placeholder:text-on-surface-variant/60"
-      />
+      <AddNoteForm sermonId={sermonId} onNoteCreated={handleNoteCreated} />
     </SermonSectionCard>
   );
 }

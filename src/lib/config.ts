@@ -9,8 +9,7 @@
  * business logic.
  */
 
-function readRequiredEnvVar(name: string): string {
-  const value = process.env[name];
+function readRequiredEnvVar(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(
       `Missing required environment variable: ${name}. ` +
@@ -21,6 +20,8 @@ function readRequiredEnvVar(name: string): string {
 }
 
 export const config = {
-  /** Base URL of the Logos FastAPI backend, e.g. http://localhost:8000 */
-  apiBaseUrl: readRequiredEnvVar("NEXT_PUBLIC_API_BASE_URL"),
+  apiBaseUrl: readRequiredEnvVar(
+    "NEXT_PUBLIC_API_BASE_URL",
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+  ),  
 };

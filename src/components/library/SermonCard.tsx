@@ -50,16 +50,22 @@ export function SermonCard({ sermon }: SermonCardProps) {
       ) : (
         <div className="mt-auto pt-1 flex flex-col gap-2">
           <SermonStatusPill status={sermon.status} />
-          {sermon.status === "failed" && sermon.failure_reason && (
-            <p className="text-xs text-on-surface-variant">{sermon.failure_reason}</p>
+          {sermon.status === "failed" && (
+            <p className="text-xs text-on-surface-variant">
+              Something went wrong processing this sermon.
+            </p>
           )}
         </div>
       )}
     </div>
   );
 
-  // Only completed sermons have a detail page to navigate to.
-  if (isCompleted) {
+  // Completed and failed sermons both have a detail page (failed shows the
+  // failure reason + a retry action there, since only SermonDetail carries
+  // failure_reason - the library list schema doesn't). Pending/processing
+  // sermons have nothing to show yet, so they stay non-interactive cards.
+  const hasDetailPage = sermon.status === "completed" || sermon.status === "failed";
+  if (hasDetailPage) {
     return (
       <Link href={`/sermons/${sermon.id}`} className="block">
         {cardContent}
