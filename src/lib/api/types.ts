@@ -71,6 +71,24 @@ export interface SermonNote {
  * contract (NoteCreateOut) that happens to match today. */
 export type CreatedNote = SermonNote;
 
+export interface SearchResult {
+  sermon_id: string;
+  sermon_title: string | null;
+  speaker: string | null;
+  matched_excerpt: string;
+  timestamp_seconds: number | null;
+  relevance_score: number;
+}
+
+/** Response from GET /v1/search. `message` is set instead of results
+ * being empty-but-unexplained when the user's library has zero sermons
+ * (see SearchService.EMPTY_LIBRARY_MESSAGE on the backend) - surface it
+ * exactly rather than inventing generic "no results" copy. */
+export interface SearchResponse {
+  results: SearchResult[];
+  message: string | null;
+}
+
 /** Full sermon detail (GET /v1/sermons/{id}), returned only when status is completed. */
 export interface SermonDetail {
   id: string;
