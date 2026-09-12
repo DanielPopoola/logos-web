@@ -1,30 +1,17 @@
 import Link from "next/link";
-
-interface NavItem {
-  href: string;
-  label: string;
-  icon: string;
-  badge?: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { href: "/library", label: "Library", icon: "local_library" },
-  { href: "/search", label: "Semantic Search", icon: "search" },
-  { href: "/ask", label: "Ask", icon: "auto_awesome", badge: "AI" },
-];
-
-interface AppSidebarProps {
-  /** Path of the currently active screen, used to highlight the matching nav item. */
-  activePath: string;
-}
+import type { User } from "@/lib/api/types";
+import { SidebarNav } from "@/components/shell/SidebarNav";
+import { SidebarUserMenu } from "@/components/shell/SidebarUserMenu";
 
 /**
  * Fixed left sidebar shown on every authenticated screen (Library, Search,
- * Ask, Sermon Detail, ...). Matches the nav shell from the approved Stitch
- * mockups. User info here is a placeholder until a user-context/profile
- * fetch is wired up.
+ * Ask, Sermon Detail, ...). Rendered once by the (app) route group's
+ * layout, which fetches `user` server-side - individual pages no longer
+ * render this themselves. Stays a Server Component; the two pieces that
+ * need client-side behavior (active-link highlighting, logout) are
+ * isolated into their own small Client Components below.
  */
-export function AppSidebar({ activePath }: AppSidebarProps) {
+export function AppSidebar({ user }: { user: User }) {
   return (
     <aside className="fixed left-0 top-0 h-screen w-[260px] bg-surface-container-lowest z-50 flex flex-col justify-between p-4 shadow-[0_4px_20px_-2px_rgba(43,36,32,0.04)]">
       <div className="flex flex-col gap-6">
@@ -48,41 +35,10 @@ export function AppSidebar({ activePath }: AppSidebarProps) {
           Add Sermon
         </Link>
 
-        <nav className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} isActive={activePath === item.href} />
-          ))}
-        </nav>
+        <SidebarNav />
       </div>
-    </aside>
-  );
-}
 
-function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
-  return (
-    <Link
-      href={item.href}
-      className={`flex items-center justify-between px-4 py-2.5 rounded-xl transition-colors text-sm ${
-        isActive
-          ? "bg-surface-container text-primary font-bold"
-          : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-semibold"
-      }`}
-    >
-      <span className="flex items-center gap-3">
-        <span
-          className={`material-symbols-outlined text-[22px] ${
-            item.icon === "auto_awesome" ? "text-tertiary" : ""
-          }`}
-        >
-          {item.icon}
-        </span>
-        {item.label}
-      </span>
-      {item.badge && (
-        <span className="px-2 py-0.5 rounded-full bg-tertiary-container/30 text-tertiary text-[10px] font-extrabold">
-          {item.badge}
-        </span>
-      )}
-    </Link>
+      <SidebarUserMenu user={user} />
+    </aside>
   );
 }
