@@ -9,7 +9,7 @@ import Link from "next/link";
  */
 export default function SermonNotFound() {
   return (
-    <div className="ml-[260px] min-h-screen flex flex-col items-center justify-center text-center px-6">
+    <div className="min-h-[calc(100vh-56px)] md:min-h-screen flex flex-col items-center justify-center text-center px-6">
       <h1 className="text-2xl font-extrabold tracking-tight mb-2">
         Sermon not found
       </h1>

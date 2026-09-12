@@ -3,7 +3,7 @@ import { AddSermonForm } from "@/components/sermon/AddSermonForm";
 
 export default function AddSermonPage() {
   return (
-    <main className="ml-[260px] min-h-screen px-10 py-10 max-w-[640px] flex flex-col justify-center">
+    <main className="min-h-[calc(100vh-56px)] md:min-h-screen px-6 md:px-10 py-6 md:py-10 max-w-[640px] flex flex-col justify-center">
       <Link
         href="/library"
         className="inline-flex items-center gap-1 text-sm font-semibold text-on-surface-variant hover:text-on-surface mb-8 self-start"

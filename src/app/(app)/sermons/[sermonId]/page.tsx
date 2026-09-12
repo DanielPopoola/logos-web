@@ -21,7 +21,7 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
   }
 
   return (
-    <main className="ml-[260px] min-h-screen px-10 py-10 max-w-[760px]">
+    <main className="px-6 md:px-10 py-6 md:py-10 max-w-[760px]">
       {result.kind === "processing" && <SermonProcessingState />}
 
       {result.kind === "ready" && result.sermon.status === "failed" && (

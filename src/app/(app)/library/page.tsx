@@ -11,7 +11,7 @@ export default async function LibraryPage() {
   const library = await getLibrary();
 
   return (
-    <main className="ml-[260px] min-h-screen px-10 py-10 max-w-[1100px]">
+    <main className="px-6 md:px-10 py-6 md:py-10 max-w-[1100px]">
       <header className="mb-10">
         <h1 className="text-3xl font-extrabold tracking-tight mb-1">
           Your library
