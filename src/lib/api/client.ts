@@ -1,4 +1,7 @@
 import { config } from "@/lib/config";
+import { getCsrfToken } from "@/lib/api/csrf";
+
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /**
  * Thrown when the backend returns a non-2xx response.
@@ -38,13 +41,31 @@ export async function sendRequest(
   path: string,
   options: RequestOptions,
 ): Promise<Response> {
+  const method = options.method ?? "GET";
+
+  // Double-submit CSRF check on the backend requires this header on any
+  // state-changing request that carries the session cookie. Read fresh
+  // each call rather than caching, since the cookie's value is the
+  // source of truth and this costs nothing meaningful to re-parse.
+  const csrfHeaders: Record<string, string> = {};
+  if (UNSAFE_METHODS.has(method)) {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      csrfHeaders["X-CSRF-Token"] = csrfToken;
+    }
+  }
+
   const response = await fetch(`${config.apiBaseUrl}${path}`, {
-    method: options.method ?? "GET",
+    method,
     // Only meaningful for browser-issued fetches - see server-client.ts
     // for why server-side calls can't rely on this and forward the
     // session cookie manually instead.
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...csrfHeaders,
+      ...options.headers,
+    },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
